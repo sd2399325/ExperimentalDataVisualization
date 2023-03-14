@@ -28,5 +28,3 @@ def load_directory_tree(dir, lvl=0):
         dir_tree['children'].append(dir_tree_child)
     return dir_tree
 
-# 测试路径树的结果
-#print(json.dumps(pathTreeJson("D:/projects", 3), indent=4))
