@@ -1,0 +1,65 @@
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeView, QAction, qApp, QWidget, QVBoxLayout
+from PyQt5.QtGui import QIcon
+
+
+class TreeView(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+
+    def init_ui(self):
+
+        layout = QVBoxLayout()
+        tree = QTreeView()
+        layout.addWidget(tree)
+        self.setLayout(layout)
+
+
+class MainWindow(QMainWindow):
+
+    def __init__(self):
+
+        super().__init__()
+        self.tree_widget = TreeView()
+        self.setCentralWidget(self.tree_widget)
+        self.init_ui()
+
+    def init_ui(self):
+
+        # 添加文件菜单选项
+        file_menu_bar = self.menuBar().addMenu('文件')
+        open_file_action = QAction(QIcon(), '打开文件', self)
+        open_folder_action = QAction(QIcon(), '打开文件夹', self)
+        close_folder_action = QAction(QIcon(), '关闭文件夹', self)
+        exit_action = QAction(QIcon(), '退出', self)
+        open_file_action.triggered.connect(lambda: print("打开文件"))
+        open_folder_action.triggered.connect(lambda: print("打开文件夹"))
+        close_folder_action.triggered.connect(lambda: print("关闭文件夹"))
+        exit_action.triggered.connect(qApp.quit)
+        file_menu_bar.addAction(open_file_action)
+        file_menu_bar.addAction(open_folder_action)
+        file_menu_bar.addAction(close_folder_action)
+        file_menu_bar.addAction(exit_action)
+
+        # 添加编辑菜单
+        edit_menu_bar = self.menuBar().addMenu('编辑')
+
+        # 添加帮助菜单
+        help_menu_bar = self.menuBar().addMenu('帮助')
+        about_action = QAction(QIcon(), '关于', self)
+        about_action.triggered.connect(lambda: print("关于"))
+        help_menu_bar.addAction(about_action)
+
+        self.setGeometry(300, 300, 250, 150)
+        self.setWindowTitle('文件浏览器')
+        self.show()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    sys.exit(app.exec_())
+
+    这里创建了两个类MainWindow和TreeView。前者是主窗口，包含了文件、编辑和帮助三个菜单，并将TreeView的实例设置为主窗口的中心部件。后者是可显示叶子节点和非叶子节点的树形结构视图。具体实现中我们使用了QVBoxLayout布局来排列TreeView。以及使用QAction来添加与定义menu绑定的动作，其中退出动作直接链接系统退出函数qApp.quit()。最后，我们调用show()函数展示了程序窗口，并启动事件循环app.exec_()。
