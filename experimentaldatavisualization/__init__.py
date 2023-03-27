@@ -11,6 +11,9 @@ def load_directory_tree(root_dir, lvl=0):
     : param lvl: 遍历层级
     : return: 路径树结构
     """
+
+    # 需要修改 在节点增加节点所在全路径便于查询
+
     dir_tree = defaultdict(dict)
     dir_tree['name'] = os.path.basename(root_dir)
     dir_tree['children'] = list()
