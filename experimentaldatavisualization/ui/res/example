@@ -54,3 +54,54 @@ def list_dirs():
 如果参数`top_level`为True，则返回根目录下所有符合条件的子目录（包括更深层次的子目录），否则返回以根目录名称为键的字典，该字典中只包含符合条件的子节点。
 
 希望这个修改能够满足客户的需求。
+
+
+
+
+好的，以下是对函数的进一步优化，它可以根据客户输入的关键词对目录表目录下的子目录进行模糊匹配查询：
+
+import os
+import json
+
+
+def traverse_dirs(root_dir, key_word=''):
+    """
+    遍历指定路径下的所有目录，并将结果构建成Json数据返回
+    :param root_dir: 待遍历的根目录
+    :param key_word: 关键词，用于模糊匹配目录名称，如果为空则不进行匹配，可选参数。
+    :return: 以Json格式返回遍历结果
+    """
+    result = {}
+
+    def traverse(path, depth=1):
+        if depth > 2:
+            return
+        items = []
+        for file_name in os.listdir(path):
+            file_path = os.path.join(path, file_name)
+            if os.path.isdir(file_path):
+                if key_word and key_word not in file_name:
+                    continue
+                item = {
+                    'name': file_name,
+                    'path': file_path,
+                    'children': []
+                }
+                item['children'] = traverse(file_path, depth + 1)
+                if item['children'] or key_word in item['name']:
+                    items.append(item)
+        return items
+
+    result['name'] = os.path.basename(root_dir)
+    result['path'] = root_dir
+    result['children'] = traverse(root_dir)
+    return json.dumps(result)
+函数说明：
+
+root_dir: 待遍历的根目录，必需参数。
+key_word: 关键词，用于模糊匹配目录名称，如果为空则不进行匹配，可选参数。
+函数返回值为Json格式的字符串，其中每个目录都包含了以下信息：
+
+name: 目录名称。
+path: 目录所在路径。
+children: 子目录列表，每个子目录也包含了以上三个信息，如果子目录下还有子目录，则继续嵌套。如果子目录名称包含了关键词或者其子目录下有符合条件的子目录，则将该目录包含在结果中。
