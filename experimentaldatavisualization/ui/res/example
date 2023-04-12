@@ -105,3 +105,54 @@ key_word: 关键词，用于模糊匹配目录名称，如果为空则不进行�
 name: 目录名称。
 path: 目录所在路径。
 children: 子目录列表，每个子目录也包含了以上三个信息，如果子目录下还有子目录，则继续嵌套。如果子目录名称包含了关键词或者其子目录下有符合条件的子目录，则将该目录包含在结果中。
+
+
+
+import os
+import json
+
+
+def traverse_directory(path, depth=2, keyword=''):
+    """
+    遍历目录并返回目录树状结构
+
+    :param path: 目录路径
+    :param depth: 遍历深度，默认为2
+    :param keyword: 模糊匹配关键词，默认为空
+    :return: 目录树状结构
+    """
+    # 获取目录名称
+    name = os.path.basename(path)
+    # 获取目录下所有文件和目录的列表
+    contents = os.listdir(path)
+    # 获取目录的真实路径
+    real_path = os.path.realpath(path)
+
+    # 初始化目录子目录集合为空
+    children = []
+
+    # 如果当前遍历深度未达到最大深度
+    if depth > 0:
+        # 遍历目录下所有文件和目录
+        for content in contents:
+            # 获取文件或目录的路径
+            content_path = os.path.join(path, content)
+            # 如果是目录，递归遍历
+            if os.path.isdir(content_path):
+                # 判断子目录是否存在
+                if os.listdir(content_path):
+                    # 子目录存在，递归遍历子目录
+                    subtree = traverse_directory(content_path, depth=depth - 1, keyword=keyword)
+                    if subtree:
+                        children.append(subtree)
+                else:
+                    # 子目录不存在，添加一个空的目录信息
+                    children.append({"name": content, "path": content_path, "children": []})
+
+            # 如果是文件，判断是否需要返回文件信息
+            elif keyword in content:
+                children.append({"name": content, "path": content_path})
+
+    # 构造目录信息
+    result = {"name": name, "path": real_path, "children": children}
+    return result
