@@ -1,60 +1,61 @@
 import os
 import json
-import fnmatch
+import re
 from collections import defaultdict
 
-
-def load_directory_tree(root_dir, lvl=0):
-    """根据输入的路径及遍历层级加载路径下所有子目录及文件，并加载成树形数据结构
-
-
-    : param root_dir: 路径
-    : param lvl: 遍历层级
-    : return: 路径树结构
+def load_dir_tree(path, depth=2, keyword=None):
     """
-
-    dir_tree = defaultdict(dict)
-    dir_tree['name'] = os.path.basename(root_dir)
-    dir_tree['dir'] = root_dir
-    dir_tree['children'] = list()
-
-    # 迭代遍历路径下第一层文件夹并构成树结构
-    files = [f for f in os.listdir(root_dir)
-             if os.path.isdir(os.path.join(root_dir, f)) and lvl>0]
-
-    # 遍历第一层文件内包含的文件夹,具体层数根据传入的遍历层数确定
-    for file in files:
-        if(lvl == 0):
-            break
-        dir_tree_child = defaultdict(dict)
-        dir_tree_child[file] = load_directory_tree(os.path.join(root_dir, file), lvl-1)
-
-        dir_tree['children'].append(dir_tree_child)
-    return dir_tree
-
-def filter_directory_tree(dir_tree, key_word):
-    """根据关键词对目录树进行筛选并重新构建目录树
-
-    : param dir_tree: 目录树
-    : param key_word: 关键词
-    : return: 筛选后的目录树
+    遍历指定目录下的子目录，并返回目录结构
+    :param path: str 目录路径
+    :param depth: int 遍历深度，默认为2
+    :param keyword: str 模糊匹配关键词，默认为空
+    :return: dict 目录结构
     """
-    # 递归遍历目录树
-    for key, value in dir_tree.items():
-        if key == 'name':
-            if key_word in value:
-                return dir_tree
-        elif key == 'children':
-            for child in value:
-                for k, v in child.items():
-                    res = filter_directory_tree(v, key_word)
-                    if res:
-                        return res
+    if not os.path.isdir(path):
+        raise ValueError("无效的路径参数: {}并不是一个合法的目录".format(path))
+    if depth < 0:
+        raise ValueError("无效的遍历深度参数: 深度参数不能为负数")
+    if not isinstance(keyword, str):
+        raise ValueError("无效的关键词参数: 关键词必须为字符串或者None")
+
+    result = {
+        "name": os.path.basename(path),
+        "path": os.path.abspath(path),
+        "children": []
+    }
+
+    if depth == 0:
+        return result
+
+    # 遍历子目录 如果不是目录则跳过
+    for file_name in os.listdir(path):
+        file_path = os.path.join(path, file_name)
+        if os.path.isdir(file_path):
+            if keyword is None or re.search(keyword, file_name):
+                child = load_dir_tree(file_path, depth=depth-1, keyword=keyword)
+                result["children"].append(child)
         else:
             continue
-    return None
 
+    return result
 
-print(json.dumps(load_directory_tree("D:/projects", 2), indent=4))
+def rename_dir(path, new_name):
+    """
+    修改指定目录的名称
+    :param path: str 目录路径
+    :param new_name: str 新的目录名称
+    """
+    if not os.path.isdir(path):
+        raise ValueError("无效的路径参数: {}并不是一个合法的目录".format(path))
+    if not isinstance(new_name, str):
+        raise ValueError("无效的名称: 文件夹名称必须为字符串")
+
+    parent_path = os.path.dirname(path)
+    new_path = os.path.join(parent_path, new_name)
+
+    if os.path.exists(new_path):
+        raise ValueError("无效的名称: {}已经存在该文件夹，请重新命名".format(new_name))
+
+    os.rename(path, new_path)
 
 
