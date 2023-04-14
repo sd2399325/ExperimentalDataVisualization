@@ -1,7 +1,7 @@
 import os
 import json
 
-import experimentaldatavisualization.__init__ as edv
+from experimentaldatavisualization import load_dir_tree, rename_dir
 
 def test_load_directory():
     # 创建测试目录和文件
@@ -33,7 +33,7 @@ def test_load_directory():
             }
         ]
     }
-    result = edv.load_dir_tree(test_dir_path)
+    result = load_dir_tree(test_dir_path)
     assert json.dumps(result, sort_keys=True) == json.dumps(expected_result, sort_keys=True)
 
     # 清理测试目录和文件
@@ -48,7 +48,7 @@ def test_rename_directory():
     os.mkdir(test_dir_path)
 
     # 测试修改目录名称
-    edv.rename_dir(test_dir_path, "new_test_dir")
+    rename_dir(test_dir_path, "new_test_dir")
     assert os.path.exists(os.path.join(".", "new_test_dir"))
 
     # 清理测试目录
