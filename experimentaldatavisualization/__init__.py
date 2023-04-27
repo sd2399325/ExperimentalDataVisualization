@@ -58,4 +58,10 @@ def rename_dir(path, new_name):
 
     os.rename(path, new_path)
 
+def import_coms(path):
+    """
+    导入coms文件
+    :param path: str coms文件路径
+    """
+
 
